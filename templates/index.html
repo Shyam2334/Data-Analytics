@@ -1,0 +1,116 @@
+<!doctype html >
+<html>
+    <head>
+        <title>Driver Dashboard</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/razorflow.min.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/custom.css') }}">
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/razorflow.min.js')}}"></script>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    </head>  
+    <body>
+        <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Driver Dashboard</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Driver Details <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Ride Details</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+        <div id="dashboard_target"></div>
+        <script type="text/javascript">
+            var db = new EmbeddedDashboard ();
+            var kpi = new KPIGroupComponent ();
+            kpi.setDimensions (12, 2);
+            var gauge = new GaugeComponent();
+            gauge.setDimensions(3,3);
+            gauge.setLimits(0, 200);
+            gauge.setCaption('Average Speed');
+            
+            $.get("/trips_details/0", function (data) {
+              kpi.setCaption('Driver Details');
+              kpi.addKPI('total_rides', {
+                caption: 'Total Trips',
+                value: data[0]['total_trips'],
+                numberSuffix: ' trips'
+              });
+              kpi.addKPI('duration', {
+                caption: 'Duration',
+                value: data[0]['duration'],
+                numberSuffix: ' min'
+              });
+              kpi.addKPI('dist', {
+                caption: 'Total Distance ',
+                value: data[0]['dist'],
+                numberSuffix: ' '
+              });
+              kpi.addKPI('average_score', {
+                caption: 'Average Score',
+                value: data[0]['average_score'],
+                numberSuffix: ' '
+              });
+            gauge.setValue(data[0]['average_speed'], {numberPrefix: 'km/hr'});
+          });
+
+            db.addComponent (kpi);
+            db.addComponent(gauge);
+
+             var chart = new ChartComponent();
+            chart.setDimensions (4, 3);
+            chart.setCaption("Overspeeding Chart");
+            chart.lock();
+            var x = new Array();
+            var y = new Array();
+            $.get("/speed_details/0", function (data) {
+                for (i = 0; i < data.length; i++) { 
+                    x[i]="Trip ID: "+data[i]['trip_id'];
+                    y[i]=data[i]['count(distinct id)']
+                }  
+                chart.setLabels (x);
+                chart.addSeries ("No_of_times_Overspeeded","No_of_times_Overspeeded",y);
+                chart.unlock();
+            });
+            db.addComponent (chart);
+
+            var chart2 = new ChartComponent();
+            chart2.setDimensions (5, 3);
+            chart2.lock();
+            chart2.setCaption("Driver Behaviour Chart");    
+            var a = new Array();
+            var b = new Array();
+            $.get("/behaviour_details/0", function (data) {
+                for (i = 0; i < data.length; i++) { 
+                    a[i]=data[i]['event_type'];
+                    b[i]=data[i]['count(distinct id)']
+                }  
+                chart2.setLabels(a);
+                chart2.setPieValues(b)
+                chart2.unlock();
+            });
+            db.addComponent (chart2 );
+            db.embedTo("dashboard_target");
+        </script>
+    </body>
+</html>
