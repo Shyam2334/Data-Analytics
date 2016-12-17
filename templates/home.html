@@ -1,0 +1,91 @@
+<!doctype html >
+<html>
+    <head>
+        <title>Driver Dashboard</title>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
+        
+
+        <style type="text/css">
+        body{padding-top:30px;}
+
+.glyphicon {  margin-bottom: 10px;margin-right: 10px;}
+
+small {
+display: block;
+line-height: 1.428571429;
+color: #999;
+}
+
+        </style>
+    </head>  
+    {% block body %}
+    <body>
+        <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Driver Dashboard</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="/">Home <span class="sr-only">(current)</span></a></li>
+        <li><a href="/driver">Driver Details</a></li>
+        <li><a href="/ride">Ride Details</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        {% if current_user.is_authenticated %}
+        <li><a href="/user/sign-in">Logged in as : {{ current_user.email }}</a></li>
+        {% else %}
+        <li><a href="/user/sign-in">Sign In</a></li>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+         <li><a href="/user/sign-out">Sign Out</a></li>
+          <li><a href="/user/profile">Profile</a></li>
+          {% endif %}
+                 </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+{% if not current_user.is_authenticated %}
+<div class="alert alert-success fade in">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+      <h4>Oh snap! This is the list of drivers in our database!</h4>
+      <p>To see a detailed visualization and behaviour of your company's drivers, You need to login with your company email id.</p>
+    </div>
+{% endif %}
+<script type="text/javascript">
+var x = new Array();
+var y = new Array();
+$.get("/all_drivers", function (data) {
+    for (i = 0; i < data.length; i++) { 
+        x[i]=data[i]['company_id'];
+        y[i]=data[i]['email'];
+        $('#main').append('<div class="col-xs-12 col-sm-6 col-md-6"><div class="well well-sm"><div class="row"><div class="col-sm-6 col-md-4"><img src="http://placehold.it/180x180" alt="" class="img-rounded img-responsive" /></div><div class="col-sm-6 col-md-8"><h4>'+'Driver '+i+'</h4><small><cite title="San Francisco, USA">San Francisco, USA <i class="glyphicon glyphicon-map-marker"></i></cite></small><p><i class="glyphicon glyphicon-envelope"></i>'+y[i]+'<br /><i class="glyphicon glyphicon-globe"></i>'+'Company: '+x[i]+'<br /><i class="glyphicon glyphicon-gift"></i>June 02, 1988</p></div></div></div>')
+    }
+
+});
+</script>
+<div class="container" id="main">
+    <div class="row">
+    </div>
+</div>
+
+        
+    </body>
+    {% endblock %}
+</html>
