@@ -10,3 +10,8 @@ Steps to Run
 
 1. pip install -r requirements.txt
 2. python app.py
+
+## Login Details:
+
+Username - client_b
+Password - Admin@0506
